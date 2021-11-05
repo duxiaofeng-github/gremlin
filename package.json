@@ -3,41 +3,46 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@testing-library/jest-dom": "^5.15.0",
-    "@testing-library/react": "^11.2.7",
-    "@testing-library/user-event": "^12.8.3",
-    "@types/jest": "^26.0.24",
-    "@types/node": "^12.20.36",
-    "@types/react": "^17.0.34",
-    "@types/react-dom": "^17.0.11",
+    "@download/blockies": "^1.0.3",
+    "@linaria/core": "^3.0.0-beta.13",
+    "@walletconnect/web3-provider": "^1.6.6",
+    "antd-mobile": "^5.0.0-beta.23",
+    "antd-mobile-icons": "^0.2.2",
+    "eth-hooks": "^2.3.14",
+    "ethers": "^5.5.1",
+    "immer": "^9.0.6",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "react-scripts": "4.0.3",
-    "typescript": "^4.4.4",
-    "web-vitals": "^1.1.2"
+    "react-router-dom": "^6.0.0",
+    "web3": "^1.6.0",
+    "web3modal": "^1.9.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "serve": "webpack serve",
+    "build": "npm -v && npm run clean && NODE_ENV=development webpack",
+    "build:production": "npm -v && npm run clean && NODE_ENV=production webpack",
+    "clean": "rm -rf dist",
+    "mint": "node miner/mint.js"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+  "devDependencies": {
+    "@linaria/webpack-loader": "^3.0.0-beta.13",
+    "@openzeppelin/contracts": "^4.3.2",
+    "@svgr/webpack": "^5.5.0",
+    "@types/react": "^17.0.34",
+    "@types/react-dom": "^17.0.11",
+    "babel-loader": "^8.2.3",
+    "css-loader": "^6.5.1",
+    "css-minimizer-webpack-plugin": "^3.1.1",
+    "dotenv": "^10.0.0",
+    "html-webpack-plugin": "^5.5.0",
+    "ipfs-http-client": "^53.0.1",
+    "mini-css-extract-plugin": "^2.4.4",
+    "terser-webpack-plugin": "^5.2.4",
+    "truffle-hdwallet-provider-privkey": "^0.3.0",
+    "ts-loader": "^9.2.6",
+    "typescript": "^4.4.4",
+    "webpack": "^5.61.0",
+    "webpack-cli": "^4.9.1",
+    "webpack-dev-server": "^4.4.0"
   }
 }
