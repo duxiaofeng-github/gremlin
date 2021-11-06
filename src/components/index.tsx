@@ -1,74 +1,84 @@
-import React from "react";
-import { useEffect, useState } from "react";
-import { getCachedAccount } from "../utils/web3";
-import { globalStore } from "../utils/store";
+import React, { useMemo } from "react";
 import { TabBar } from "antd-mobile";
 import {
   getHomePagePath,
   getHomePageRoute,
-  getMarketPlacePath,
   getMarketPlaceRoute,
-  getUserPath,
   getUserRoute,
-  gotoConnectWallet,
+  gotoHomePage,
+  gotoMarketPlace,
+  gotoUser,
 } from "../utils/routes";
 import { AppOutline, ShopbagOutline, UserOutline } from "antd-mobile-icons";
-import { Route, Routes, Navigate, useNavigate } from "react-router-dom";
+import { Route, Switch, Redirect } from "react-router-dom";
 import { styleFlex, styleFlexDirectionColumn, styleFullWidthAndHeight, styleNoShrink } from "../utils/styles";
 import { cx } from "@linaria/core";
 import { ScrollView } from "./common/scroll-view";
 import { HomePage } from "./home-page";
 import { User } from "./user";
 import { MarketPlace } from "./market-place";
+import { Location } from "history";
+import { matchPath } from "react-router";
 
-interface IProps {}
+interface IProps {
+  location: Location;
+}
 
 const tabs = [
-  { key: "homePage", title: "Home", icon: <AppOutline />, path: getHomePagePath() },
-  { key: "market", title: "Market", icon: <ShopbagOutline />, path: getMarketPlacePath() },
-  { key: "user", title: "User", icon: <UserOutline />, path: getUserPath() },
+  {
+    key: "homePage",
+    title: "Home",
+    icon: <AppOutline />,
+    route: getHomePageRoute(),
+    component: HomePage,
+    onClick: () => gotoHomePage(),
+  },
+  {
+    key: "market",
+    title: "Market",
+    icon: <ShopbagOutline />,
+    route: getMarketPlaceRoute(),
+    component: MarketPlace,
+    onClick: () => gotoMarketPlace(),
+  },
+  {
+    key: "user",
+    title: "User",
+    icon: <UserOutline />,
+    route: getUserRoute(),
+    component: User,
+    onClick: () => gotoUser(),
+  },
 ];
 
 export const Index: React.SFC<IProps> = (props) => {
-  const navigate = useNavigate();
-  const [activeKey, setActiveKey] = useState(tabs[0].key);
-
-  async function checkAccount() {
-    const address = await getCachedAccount();
-
-    if (address) {
-      globalStore.update((store) => {
-        store.walletAddress = address;
-      });
-    } else {
-      gotoConnectWallet();
-    }
-  }
-
-  useEffect(() => {
-    checkAccount();
-  }, []);
+  const { location } = props;
+  const matchedTab = useMemo(
+    () =>
+      tabs.find((item) => {
+        return matchPath(location.pathname, { path: item.route, exact: true });
+      }),
+    [location],
+  );
 
   return (
     <div className={cx(styleFullWidthAndHeight, styleFlex, styleFlexDirectionColumn)}>
       <ScrollView grow>
-        <Routes>
-          <Route path={getUserRoute()} element={<User />} />
-          <Route path={getMarketPlaceRoute()} element={<MarketPlace />} />
-          <Route path={getHomePageRoute()} element={<HomePage />} />
-          <Route element={<Navigate replace to={getHomePagePath()} />} />
-        </Routes>
+        <Switch>
+          {tabs.map((item) => {
+            return <Route key={item.key} exact path={item.route} component={item.component} />;
+          })}
+          <Route render={() => <Redirect to={getHomePagePath()} />} />
+        </Switch>
       </ScrollView>
       <div className={styleNoShrink}>
         <TabBar
-          activeKey={activeKey}
+          activeKey={matchedTab ? matchedTab.key : tabs[0].key}
           onChange={(key) => {
-            setActiveKey(key);
-
             const activeItem = tabs.find((item) => item.key === key);
 
             if (activeItem) {
-              navigate(activeItem.path);
+              activeItem.onClick();
             }
           }}>
           {tabs.map((item) => (

@@ -4,7 +4,7 @@ const ipfsHttpClient = require("ipfs-http-client");
 const ipfs = ipfsHttpClient.create({ host: "localhost", port: "5001", protocol: "http" });
 
 const networkId = "5777";
-const toAddress = "0xeAFA755f1Bbc970538D0e6A4Bd30f351e1c095aa";
+const toAddress = "0x9EaD711327065c5963682B9b44AA30F68A150a68";
 
 async function main() {
   const provider = new ethers.providers.JsonRpcProvider("HTTP://127.0.0.1:7545");

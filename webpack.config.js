@@ -4,9 +4,12 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 const webpack = require("webpack");
 const TerserPlugin = require("terser-webpack-plugin");
+const ReactRefreshPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
 
 const isProductionEnv = process.env.NODE_ENV === "production";
 const isDevelopmentEnv = process.env.NODE_ENV === "development";
+const infuraId = process.env.INFURA_ID || "";
+const ipfsHost = process.env.IPFS_HOST || "http://localhost:10098";
 
 module.exports = {
   mode: isDevelopmentEnv ? "development" : "production",
@@ -23,7 +26,10 @@ module.exports = {
         test: /\.(tsx|ts)$/,
         use: [
           {
-            loader: "babel-loader", // transform es6 to es5
+            loader: "babel-loader",
+            options: {
+              plugins: [isDevelopmentEnv && require.resolve("react-refresh/babel")].filter(Boolean),
+            },
           },
           {
             loader: "@linaria/webpack-loader", // extract css from js
@@ -69,13 +75,17 @@ module.exports = {
   },
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
+    alias: {
+      web3: "web3/dist/web3.min.js",
+      "@walletconnect/web3-provider": "@walletconnect/web3-provider/dist/umd/index.min.js",
+    },
   },
   watchOptions: {
     poll: 1000,
   },
   devServer: {
     host: "0.0.0.0",
-    port: process.env.PROXY || 8084,
+    port: process.env.PROXY || 3000,
     hot: true,
     allowedHosts: "all",
     proxy: [
@@ -109,8 +119,9 @@ module.exports = {
     ],
   },
   plugins: [
+    new ReactRefreshPlugin(),
     new MiniCssExtractPlugin({
-      filename: "styles-[contenthash].css",
+      filename: "styles.css",
     }),
     new HtmlWebpackPlugin({
       filename: "index.html",
@@ -119,6 +130,8 @@ module.exports = {
     new webpack.DefinePlugin({
       isProduction: JSON.stringify(isProductionEnv),
       isDevelopment: JSON.stringify(isDevelopmentEnv),
+      infuraId: JSON.stringify(infuraId),
+      ipfsHost: JSON.stringify(ipfsHost),
     }),
   ],
 };

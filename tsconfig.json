@@ -4,6 +4,7 @@
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "moduleResolution": "node",
+    "resolveJsonModule": true,
     "strict": true,
     "jsx": "react",
     "module": "esnext",

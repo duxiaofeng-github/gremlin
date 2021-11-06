@@ -1,14 +1,9 @@
 import Web3 from "web3";
 import Web3Modal from "web3modal";
 import WalletConnectProvider from "@walletconnect/web3-provider";
-import { provider } from "web3-core";
 import { globalStore } from "./store";
-
-let infuraId: string;
-
-export function setInfuraId(id: string) {
-  infuraId = id;
-}
+import { AbiItem } from "web3-utils";
+import { Contract } from "web3-eth-contract";
 
 let web3ModalCache: Web3Modal | undefined;
 
@@ -20,7 +15,7 @@ function getWeb3ModalInstance() {
         walletconnect: {
           package: WalletConnectProvider,
           options: {
-            infuraId,
+            infuraId: infuraId,
           },
         },
       },
@@ -32,7 +27,7 @@ function getWeb3ModalInstance() {
 
 let web3Cache: Web3 | undefined;
 
-async function getWeb3Instance(provider: provider) {
+async function getWeb3Instance(provider: any) {
   if (web3Cache == null) {
     web3Cache = new Web3(provider);
 
@@ -138,4 +133,61 @@ async function subscribeWeb3Event(provider: any, evt: string, handler: (data?: a
   if (provider.on) {
     provider.on(evt, handler);
   }
+}
+
+export async function getNetworkId() {
+  const web3Modal = getWeb3ModalInstance();
+
+  const web3 = await getWeb3InstanceByWeb3Modal(web3Modal);
+
+  return web3.eth.net.getId();
+}
+
+export async function loadContract(abi: AbiItem | AbiItem[], contractAddress: string) {
+  const web3Modal = getWeb3ModalInstance();
+
+  const web3 = await getWeb3InstanceByWeb3Modal(web3Modal);
+
+  return new web3.eth.Contract(abi, contractAddress);
+}
+
+interface NFTMetaData {
+  name: string;
+  description: string;
+  image: string;
+  external_url?: string;
+  attributes?: {
+    display_type?: string;
+    trait_type: string;
+    value: string | number;
+  }[];
+}
+
+export interface NFTData {
+  tokenId: string;
+  tokenUri: string;
+  metaData?: NFTMetaData;
+}
+
+export async function loadNFTsByAddress(contract: Contract, walletAddress: string) {
+  const balance = await contract.methods.balanceOf(walletAddress).call();
+  const NFTs: NFTData[] = [];
+
+  for (let i = 0; i < balance; i++) {
+    const tokenId = await contract.methods.tokenOfOwnerByIndex(walletAddress, i).call();
+    const tokenUri = await contract.methods.tokenURI(tokenId).call();
+
+    NFTs.push({ tokenId, tokenUri });
+  }
+
+  return NFTs;
+}
+
+export async function getBalance(walletAddress: string) {
+  const web3Modal = getWeb3ModalInstance();
+  const web3 = await getWeb3InstanceByWeb3Modal(web3Modal);
+
+  const result = await web3.eth.getBalance(walletAddress);
+
+  return web3.utils.fromWei(result, "ether");
 }

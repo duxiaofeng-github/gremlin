@@ -164,7 +164,7 @@
                           "name": "type",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 4294967269,
+                          "referencedDeclaration": -27,
                           "src": "886:4:10",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_metatype_pure$__$returns$__$",
@@ -447,7 +447,7 @@
                           "name": "type",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 4294967269,
+                          "referencedDeclaration": -27,
                           "src": "886:4:10",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_metatype_pure$__$returns$__$",
@@ -599,11 +599,11 @@
   },
   "compiler": {
     "name": "solc",
-    "version": "0.8.9+commit.e5eed63a.Emscripten.clang"
+    "version": "0.8.9+commit.e5eed63a.Darwin.appleclang"
   },
   "networks": {},
   "schemaVersion": "3.4.3",
-  "updatedAt": "2021-11-04T18:14:19.731Z",
+  "updatedAt": "2021-11-05T18:06:08.598Z",
   "devdoc": {
     "details": "Implementation of the {IERC165} interface. Contracts that want to implement ERC165 should inherit from this contract and override {supportsInterface} to check for the additional interface id that will be supported. For example: ```solidity function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {     return interfaceId == type(MyInterface).interfaceId || super.supportsInterface(interfaceId); } ``` Alternatively, {ERC165Storage} provides an easier to use but more expensive implementation.",
     "kind": "dev",

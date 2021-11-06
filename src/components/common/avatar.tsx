@@ -7,13 +7,11 @@ import { UserCircleOutline } from "antd-mobile-icons";
 interface IProps {
   className?: string;
   walletAddress?: string;
-  src?: string;
 }
 
 export const Avatar: React.SFC<IProps> = (props) => {
-  const { className, walletAddress, src } = props;
-
-  const [avatarSrc, setAvatarSrc] = useState(src);
+  const { className, walletAddress } = props;
+  const [avatarSrc, setAvatarSrc] = useState("");
 
   useEffect(() => {
     if (walletAddress) {

@@ -1,9 +1,10 @@
 import { globalStore } from "./store";
-import { connectAccount, disconnectAccount } from "./web3";
+import { connectAccount, disconnectAccount, getNetworkId, loadContract, loadNFTsByAddress, NFTData } from "./web3";
+import gremlinAbi from "../../blockchain/abis/Gremlin.json";
 
-export function maskString(str: string, from: number, to: number, replacement: string) {
-  const head = str.slice(0, from);
-  const tail = str.slice(str.length - to);
+export function maskString(str: string, headNumber: number, tailNumber: number, replacement: string) {
+  const head = str.slice(0, headNumber);
+  const tail = str.slice(str.length - tailNumber);
 
   return head + replacement + tail;
 }
@@ -82,4 +83,53 @@ export function scrollTo(options: { element: HTMLElement; to: number; duration?:
   };
 
   animateScroll();
+}
+
+export async function fillNFTsMetaData(nfts: NFTData[]) {
+  const promises = nfts.map((token) => {
+    const { tokenUri } = token;
+
+    return fetch(`${ipfsHost}/ipfs/${tokenUri}?clear`);
+  });
+
+  const responses = await Promise.all(promises);
+
+  const jsonPromises = responses.map((item) => {
+    if (!item.ok) {
+      console.error(item.status);
+
+      return null;
+    } else {
+      return item.json();
+    }
+  });
+
+  const metaDatas = await Promise.all(jsonPromises);
+
+  metaDatas.forEach((item, index) => {
+    if (item != null) {
+      nfts[index].metaData = item;
+    }
+  });
+
+  return nfts;
+}
+
+export async function listMyGremlins(walletAddress: string) {
+  const networkId = await getNetworkId();
+
+  if (networkId) {
+    const contractNetworkInfo = (gremlinAbi.networks as any)[`${networkId}`];
+
+    if (contractNetworkInfo) {
+      const contract = await loadContract(gremlinAbi.abi as any, contractNetworkInfo.address);
+
+      if (contract) {
+        const gremlins = await loadNFTsByAddress(contract, walletAddress);
+        const gremlinsWithMetaData = fillNFTsMetaData(gremlins);
+
+        return gremlinsWithMetaData;
+      }
+    }
+  }
 }

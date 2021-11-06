@@ -6,6 +6,9 @@ export const fontSizeNormal = "14px";
 export const fontSizeLarge = "16px";
 export const fontSizeXlarge = "18px";
 
+export const colorTextLightGray = "#9b9b9b";
+export const colorBorder = "#ededed";
+
 export const globals = css`
   :global() {
     body {
@@ -16,24 +19,10 @@ export const globals = css`
       -moz-osx-font-smoothing: grayscale;
       -webkit-overflow-scrolling: touch;
     }
-    /* @font-face {
-      font-family: "Maison Neue Book";
-      font-weight: 400;
-      font-style: normal;
-      src: url("https://d207bzo2lz83l1.cloudfront.net/MaisonNeueWEB-Book.woff2") format("woff2"),
-        url("https://d207bzo2lz83l1.cloudfront.net/MaisonNeueWEB-Book.woff") format("woff");
-    } */
 
-    @font-face {
-      font-family: "Cooper Light";
-      font-weight: normal;
-      font-style: normal;
-      src: url("//db.onlinewebfonts.com/t/f23610af149fa0ed5017d7ec90aaf376.eot");
-      src: url("//db.onlinewebfonts.com/t/f23610af149fa0ed5017d7ec90aaf376.eot?#iefix") format("embedded-opentype"),
-        url("//db.onlinewebfonts.com/t/f23610af149fa0ed5017d7ec90aaf376.woff2") format("woff2"),
-        url("//db.onlinewebfonts.com/t/f23610af149fa0ed5017d7ec90aaf376.woff") format("woff"),
-        url("//db.onlinewebfonts.com/t/f23610af149fa0ed5017d7ec90aaf376.ttf") format("truetype"),
-        url("//db.onlinewebfonts.com/t/f23610af149fa0ed5017d7ec90aaf376.svg#Cooper Lt BT") format("svg");
+    * {
+      padding: 0;
+      margin: 0;
     }
   }
 `;

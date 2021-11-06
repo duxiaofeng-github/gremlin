@@ -494,11 +494,11 @@
   },
   "compiler": {
     "name": "solc",
-    "version": "0.8.9+commit.e5eed63a.Emscripten.clang"
+    "version": "0.8.9+commit.e5eed63a.Darwin.appleclang"
   },
   "networks": {},
   "schemaVersion": "3.4.3",
-  "updatedAt": "2021-11-04T18:14:19.707Z",
+  "updatedAt": "2021-11-05T18:06:08.524Z",
   "devdoc": {
     "details": "Interface for any contract that wants to support safeTransfers from ERC721 asset contracts.",
     "kind": "dev",
