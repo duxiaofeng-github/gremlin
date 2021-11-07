@@ -1,9 +1,11 @@
 import { css } from "@linaria/core";
 import React from "react";
-import { colorBorder, colorTextLightGray, fontSizeLarge, fontSizeSmall } from "../../utils/styles";
+import { colorTextLightGray, fontSizeLarge, fontSizeSmall } from "../../utils/styles";
 import { NFTData } from "../../utils/web3";
 import { List as AntdList } from "antd-mobile";
 import { gotoGrelinDetail } from "../../utils/routes";
+import { formatPrice } from "../../utils/common";
+import Eth from "../../../public/eth.svg";
 
 interface IProps {
   items: NFTData[];
@@ -17,16 +19,24 @@ export const List: React.SFC<IProps> = (props) => {
       {items.map((item) =>
         item.metaData ? (
           <AntdList.Item
-            key={item.tokenId}
+            key={item.id}
             arrow
             prefix={<img className={styleCover} src={item.metaData.image} />}
             description={
-              <div
-                className={styleDescription}
-                onClick={() => {
-                  gotoGrelinDetail({ id: `${item.tokenId}` });
-                }}>
-                {item.metaData.description}
+              <div>
+                <div
+                  className={styleDescription}
+                  onClick={() => {
+                    gotoGrelinDetail({ id: `${item.id}` });
+                  }}>
+                  {item.metaData.description}
+                </div>
+                {item.offer != null ? (
+                  <div className={stylePrice}>
+                    <Eth className={styleIcon} width={20} height={20} fill="var(--adm-color-text)" />
+                    {formatPrice(item.offer.price)}
+                  </div>
+                ) : null}
               </div>
             }>
             <div className={styleName}>{item.metaData.name}</div>
@@ -52,5 +62,18 @@ const styleName = css`
 const styleDescription = css`
   font-size: ${fontSizeSmall};
   color: ${colorTextLightGray};
+  margin-top: 10px;
+`;
+
+const styleIcon = css`
+  margin-left: -3px;
+  margin-right: 5px;
+`;
+
+const stylePrice = css`
+  display: flex;
+  align-items: center;
+  color: var(--adm-color-primary);
+  font-weight: bold;
   margin-top: 10px;
 `;

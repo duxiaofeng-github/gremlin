@@ -6,8 +6,8 @@ export const fontSizeNormal = "14px";
 export const fontSizeLarge = "16px";
 export const fontSizeXlarge = "18px";
 
-export const colorTextLightGray = "#9b9b9b";
-export const colorBorder = "#ededed";
+export const colorTextLightGray = "var(--adm-color-weak)";
+export const colorBorder = "var(--adm-border-color)";
 
 export const globals = css`
   :global() {
@@ -18,6 +18,7 @@ export const globals = css`
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       -webkit-overflow-scrolling: touch;
+      background-color: rgb(245, 247, 250);
     }
 
     * {
@@ -240,11 +241,11 @@ export const styleLineHeight15 = css`
 `;
 
 export const styleBorderBottom = css`
-  border-bottom: solid 1px #999;
+  border-bottom: solid 1px ${colorBorder};
 `;
 
 export const styleBorderTop = css`
-  border-top: solid 1px #999;
+  border-top: solid 1px ${colorBorder};
 `;
 
 export const styleRelative = css`
@@ -254,6 +255,10 @@ export const styleRelative = css`
 export const styleFullWidthAndHeight = css`
   width: 100%;
   height: 100%;
+`;
+
+export const styleBackgroundWhite = css`
+  background-color: #fff;
 `;
 
 export const styleFlex = css`

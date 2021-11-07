@@ -5,7 +5,13 @@ import { disconnectWallet, maskString } from "../utils/common";
 import { useData } from "../utils/hooks/use-data";
 import { IStore } from "../utils/store";
 import { useRexContext } from "../utils/store/store";
-import { colorTextLightGray, styleFlex, styleFlexDirectionColumn, styleFullWidthAndHeight } from "../utils/styles";
+import {
+  colorTextLightGray,
+  styleBackgroundWhite,
+  styleFlex,
+  styleFlexDirectionColumn,
+  styleFullWidthAndHeight,
+} from "../utils/styles";
 import { getBalance } from "../utils/web3";
 import { Avatar } from "./common/avatar";
 import { Loading } from "./common/loading";
@@ -19,7 +25,7 @@ export const User: React.SFC<IProps> = (props) => {
   });
 
   return (
-    <div className={cx(styleFullWidthAndHeight, styleFlex, styleFlexDirectionColumn)}>
+    <div className={cx(styleFullWidthAndHeight, styleBackgroundWhite, styleFlex, styleFlexDirectionColumn)}>
       <Loading
         options={options}
         render={(data) => {

@@ -3,6 +3,7 @@ import React from "react";
 import { connectWallet } from "../utils/common";
 import Logo from "../../public/logo.svg";
 import {
+  styleBackgroundWhite,
   styleFlex,
   styleFlexAlignItemCenter,
   styleFlexDirectionColumn,
@@ -28,6 +29,7 @@ export const ConnectWallet: React.SFC<IProps> = (props) => {
     <div
       className={cx(
         styleFullWidthAndHeight,
+        styleBackgroundWhite,
         styleFlex,
         styleFlexDirectionColumn,
         styleFlexJustifyContentCenter,

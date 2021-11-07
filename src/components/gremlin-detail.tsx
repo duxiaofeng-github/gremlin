@@ -1,5 +1,5 @@
 import { css, cx } from "@linaria/core";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   cancelOfferById,
   fillOfferById,
@@ -26,35 +26,38 @@ export const GremlinDetail: React.SFC<IProps> = (props) => {
   const { id } = props;
   const parsedId = parseId(id);
   const { walletAddress, offers } = useRexContext((store: IStore) => store);
+  const offer = useMemo(() => (offers ? getAvailableMarketOfferById(offers, parsedId) : undefined), [offers, parsedId]);
   const options = useData(async () => {
     if (parsedId) {
       const gremlin = await getGremlinById(parsedId);
 
-      if (gremlin && offers) {
-        const offer = getAvailableMarketOfferById(offers, parsedId);
-
-        return { gremlin, offer };
-      }
+      return { gremlin };
     }
   }, [id]);
   const [modalVisible, setModalVisible] = useState(false);
-  const { triggerer: makeOffer } = useSubmission(async (price?: number) => {
-    await makeOfferById(parsedId, price!, walletAddress!);
+  const { triggerer: makeOffer } = useSubmission(async (data?: { price: number }) => {
+    const { price } = data!;
+
+    await makeOfferById(parsedId, price, walletAddress!);
     await updateOffers();
 
     Toast.show("Make offer successful!");
   });
 
-  const { triggerer: cancelOffer } = useSubmission(async () => {
-    await cancelOfferById(parsedId, walletAddress!);
+  const { triggerer: cancelOffer } = useSubmission(async (data?: { offerId: number }) => {
+    const { offerId } = data!;
+
+    await cancelOfferById(offerId, walletAddress!);
     await updateOffers();
 
     Toast.show("Cancel offer successful!");
   });
 
-  const { triggerer: fillOffer } = useSubmission(async (price?: number) => {
-    await fillOfferById(parsedId, walletAddress!, price!);
+  const { triggerer: fillOffer } = useSubmission(async (data?: { offerId: number; price: number }) => {
+    const { offerId, price } = data!;
+    await fillOfferById(offerId, walletAddress!, price);
     await updateOffers();
+    await options.retry();
 
     Toast.show("Fill offer successful!");
   });
@@ -64,12 +67,12 @@ export const GremlinDetail: React.SFC<IProps> = (props) => {
       skipDataChecking
       options={options}
       render={(data) => {
-        if (!data) {
+        if (!data || !data.gremlin) {
           return <FullScreenTips type="warning" mainTips="Something went wrong" />;
         }
 
-        const { gremlin, offer } = data;
-        const { owner, metaData, tokenId } = gremlin;
+        const { gremlin } = data;
+        const { owner, metaData, id } = gremlin;
         const ownerUser = offer ? offer.user : owner;
         const isMyGremlin = walletAddress === ownerUser;
 
@@ -85,7 +88,7 @@ export const GremlinDetail: React.SFC<IProps> = (props) => {
                     Dialog.confirm({
                       content: "Are you sure to cancel the order?",
                       onConfirm: () => {
-                        cancelOffer();
+                        cancelOffer({ offerId: offer.offerId });
                       },
                     });
                   }}>
@@ -109,7 +112,7 @@ export const GremlinDetail: React.SFC<IProps> = (props) => {
                   Dialog.confirm({
                     content: "Are you sure to buy this gremlin?",
                     onConfirm: () => {
-                      fillOffer(offer.price);
+                      fillOffer({ offerId: offer.offerId, price: offer.price });
                     },
                   });
                 }}>
@@ -119,7 +122,7 @@ export const GremlinDetail: React.SFC<IProps> = (props) => {
             <OfferModal
               visible={modalVisible}
               onOk={(price: number) => {
-                makeOffer(price);
+                makeOffer({ price });
 
                 setModalVisible(false);
               }}

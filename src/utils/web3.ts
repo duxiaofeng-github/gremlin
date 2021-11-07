@@ -165,10 +165,11 @@ interface NFTMetaData {
 }
 
 export interface NFTData {
-  tokenId: number;
-  tokenUri: string;
+  id: number;
+  uri: string;
   owner?: string;
   metaData?: NFTMetaData;
+  offer?: MarketOfferData;
 }
 
 export async function loadNFTsByAddress(contract: Contract, walletAddress: string) {
@@ -179,7 +180,7 @@ export async function loadNFTsByAddress(contract: Contract, walletAddress: strin
     const tokenId = await contract.methods.tokenOfOwnerByIndex(walletAddress, i).call();
     const tokenUri = await loadTokenUriById(contract, tokenId);
 
-    NFTs.push({ tokenId, tokenUri, owner: walletAddress });
+    NFTs.push({ id: tokenId, uri: tokenUri, owner: walletAddress });
   }
 
   return NFTs;
@@ -189,7 +190,7 @@ export async function loadNFTsByMarketOffers(contract: Contract, offers: MarketO
   const tokenIds = offers.map((item) => item.id);
   const tokenUris = await Promise.all(tokenIds.map((tokenId) => loadTokenUriById(contract, tokenId)));
   const NFTs: NFTData[] = tokenIds.map((tokenId, index) => {
-    return { tokenId, tokenUri: tokenUris[index] };
+    return { id: tokenId, uri: tokenUris[index], offer: offers[index] };
   });
 
   return NFTs;
@@ -201,7 +202,7 @@ export async function loadNFTById(contract: Contract, tokenId: number): Promise<
     loadTokenOwnerById(contract, tokenId),
   ]);
 
-  return { tokenId, tokenUri, owner };
+  return { id: tokenId, uri: tokenUri, owner };
 }
 
 export async function loadTokenUriById(contract: Contract, tokenId: number): Promise<string> {
@@ -228,7 +229,14 @@ export interface MarketOfferData {
 function formatOffer(offer: any): MarketOfferData {
   const { id, offerId, price, user, fulfilled, cancelled } = offer;
 
-  return { id: parseId(id), offerId: parseId(offerId), price: parseFloat(price), user, fulfilled, cancelled };
+  return {
+    id: parseId(id),
+    offerId: parseId(offerId),
+    price,
+    user,
+    fulfilled,
+    cancelled,
+  };
 }
 
 export async function loadMarketOffers(marketContract: Contract) {
@@ -239,13 +247,15 @@ export async function loadMarketOffers(marketContract: Contract) {
     offerPromises.push(marketContract.methods.offers(i).call());
   }
 
-  const offers = await Promise.all(offerPromises);
+  const rawOffers = await Promise.all(offerPromises);
 
-  return offers.map((item) => formatOffer(item));
+  const offers: MarketOfferData[] = rawOffers.map((item) => formatOffer(item));
+
+  return offers;
 }
 
-export async function cancelMarketOfferById(marketContract: Contract, tokenId: number, walletAddress: string) {
-  await marketContract.methods.cancelOffer(tokenId).send({ from: walletAddress });
+export async function cancelMarketOfferById(marketContract: Contract, offerId: number, walletAddress: string) {
+  await marketContract.methods.cancelOffer(offerId).send({ from: walletAddress });
 }
 
 export async function makeMarketOfferById(
@@ -277,11 +287,13 @@ export async function makeMarketOfferById(
 
 export async function fillMarketOfferById(
   marketContract: Contract,
-  tokenId: number,
+  offerId: number,
   walletAddress: string,
   price: number,
 ) {
-  await marketContract.methods.fillOffer(tokenId).send({ from: walletAddress, value: `${price}` });
+  const priceWei = Web3.utils.toWei(`${price}`, "wei");
+
+  await marketContract.methods.fillOffer(offerId).send({ from: walletAddress, value: priceWei });
 }
 
 export async function getBalance(walletAddress: string) {

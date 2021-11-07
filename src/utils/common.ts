@@ -16,6 +16,7 @@ import {
 } from "./web3";
 import gremlinAbi from "../../blockchain/abis/Gremlin.json";
 import marketAbi from "../../blockchain/abis/GremlinMarketplace.json";
+import Web3 from "web3";
 
 export function maskString(str: string, headNumber: number, tailNumber: number, replacement: string) {
   const head = str.slice(0, headNumber);
@@ -102,7 +103,7 @@ export function scrollTo(options: { element: HTMLElement; to: number; duration?:
 
 export async function fillNFTsMetaData(nfts: NFTData[]) {
   const promises = nfts.map((token) => {
-    const { tokenUri } = token;
+    const { uri: tokenUri } = token;
 
     return fetch(`${ipfsHost}/ipfs/${tokenUri}?clear`);
   });
@@ -130,6 +131,25 @@ export async function fillNFTsMetaData(nfts: NFTData[]) {
   return nfts;
 }
 
+export async function listGremlinsByOffers(offers: MarketOfferData[]) {
+  const networkId = await getNetworkId();
+
+  if (networkId) {
+    const contractNetworkInfo = (gremlinAbi.networks as any)[`${networkId}`];
+
+    if (contractNetworkInfo) {
+      const contract = await loadContract(gremlinAbi.abi as any, contractNetworkInfo.address);
+
+      if (contract) {
+        const gremlinsOnMarket = await loadNFTsByMarketOffers(contract, offers);
+        const gremlinsWithMetaData = await fillNFTsMetaData(gremlinsOnMarket);
+
+        return gremlinsWithMetaData;
+      }
+    }
+  }
+}
+
 export async function listMyGremlins(walletAddress: string, offers: MarketOfferData[]) {
   const networkId = await getNetworkId();
 
@@ -143,7 +163,7 @@ export async function listMyGremlins(walletAddress: string, offers: MarketOfferD
         const myAvailableOffers = getMyAvailableOffers(offers, walletAddress);
         const gremlinsOnMarket = await loadNFTsByMarketOffers(contract, myAvailableOffers);
         const gremlins = await loadNFTsByAddress(contract, walletAddress);
-        const gremlinsWithMetaData = fillNFTsMetaData(gremlinsOnMarket.concat(gremlins));
+        const gremlinsWithMetaData = await fillNFTsMetaData(gremlinsOnMarket.concat(gremlins));
 
         return gremlinsWithMetaData;
       }
@@ -215,18 +235,22 @@ export async function makeOfferById(id: number, price: number, walletAddress: st
   }
 }
 
-export async function fillOfferById(id: number, walletAddress: string, price: number) {
+export async function fillOfferById(offerId: number, walletAddress: string, price: number) {
   const contract = await getMarketOfferContract();
 
   if (contract) {
-    await fillMarketOfferById(contract, id, walletAddress, price);
+    await fillMarketOfferById(contract, offerId, walletAddress, price);
   }
 }
 
-export async function cancelOfferById(id: number, walletAddress: string) {
+export async function cancelOfferById(offerId: number, walletAddress: string) {
   const contract = await getMarketOfferContract();
 
   if (contract) {
-    await cancelMarketOfferById(contract, id, walletAddress);
+    await cancelMarketOfferById(contract, offerId, walletAddress);
   }
+}
+
+export function formatPrice(price: number) {
+  return Web3.utils.fromWei(`${price}`, "ether");
 }
