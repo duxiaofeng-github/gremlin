@@ -1,6 +1,21 @@
 import { globalStore } from "./store";
-import { connectAccount, disconnectAccount, getNetworkId, loadContract, loadNFTsByAddress, NFTData } from "./web3";
+import {
+  cancelMarketOfferById,
+  connectAccount,
+  disconnectAccount,
+  fillMarketOfferById,
+  getNetworkId,
+  loadContract,
+  loadMarketOffers,
+  loadNFTById,
+  loadNFTsByAddress,
+  loadNFTsByMarketOffers,
+  makeMarketOfferById,
+  MarketOfferData,
+  NFTData,
+} from "./web3";
 import gremlinAbi from "../../blockchain/abis/Gremlin.json";
+import marketAbi from "../../blockchain/abis/GremlinMarketplace.json";
 
 export function maskString(str: string, headNumber: number, tailNumber: number, replacement: string) {
   const head = str.slice(0, headNumber);
@@ -115,7 +130,7 @@ export async function fillNFTsMetaData(nfts: NFTData[]) {
   return nfts;
 }
 
-export async function listMyGremlins(walletAddress: string) {
+export async function listMyGremlins(walletAddress: string, offers: MarketOfferData[]) {
   const networkId = await getNetworkId();
 
   if (networkId) {
@@ -125,11 +140,93 @@ export async function listMyGremlins(walletAddress: string) {
       const contract = await loadContract(gremlinAbi.abi as any, contractNetworkInfo.address);
 
       if (contract) {
+        const myAvailableOffers = getMyAvailableOffers(offers, walletAddress);
+        const gremlinsOnMarket = await loadNFTsByMarketOffers(contract, myAvailableOffers);
         const gremlins = await loadNFTsByAddress(contract, walletAddress);
-        const gremlinsWithMetaData = fillNFTsMetaData(gremlins);
+        const gremlinsWithMetaData = fillNFTsMetaData(gremlinsOnMarket.concat(gremlins));
 
         return gremlinsWithMetaData;
       }
     }
+  }
+}
+
+export async function getGremlinContract() {
+  const networkId = await getNetworkId();
+
+  if (networkId) {
+    const contractNetworkInfo = (gremlinAbi.networks as any)[`${networkId}`];
+
+    if (contractNetworkInfo) {
+      const contract = await loadContract(gremlinAbi.abi as any, contractNetworkInfo.address);
+
+      return contract;
+    }
+  }
+}
+
+export async function getGremlinById(id: number) {
+  const contract = await getGremlinContract();
+
+  if (contract) {
+    const gremlin = await loadNFTById(contract, id);
+    const [gremlinWithMetaData] = await fillNFTsMetaData([gremlin]);
+
+    return gremlinWithMetaData;
+  }
+}
+
+export async function getMarketOfferContract() {
+  const networkId = await getNetworkId();
+
+  if (networkId) {
+    const contractNetworkInfo = (marketAbi.networks as any)[`${networkId}`];
+
+    if (contractNetworkInfo) {
+      const contract = await loadContract(marketAbi.abi as any, contractNetworkInfo.address);
+
+      return contract;
+    }
+  }
+}
+
+export async function getMarketOffers() {
+  const contract = await getMarketOfferContract();
+
+  if (contract) {
+    return loadMarketOffers(contract);
+  }
+}
+
+export function getAvailableMarketOfferById(offers: MarketOfferData[], id: number) {
+  return offers.find((item) => item.id === id && !item.cancelled && !item.fulfilled);
+}
+
+export function getMyAvailableOffers(offers: MarketOfferData[], walletAddress: string) {
+  return offers.filter((item) => item.user === walletAddress && !item.cancelled && !item.fulfilled);
+}
+
+export async function makeOfferById(id: number, price: number, walletAddress: string) {
+  const gremlinContract = await getGremlinContract();
+  const marketContract = await getMarketOfferContract();
+
+  if (gremlinContract && marketContract) {
+    await makeMarketOfferById(gremlinContract, marketContract, id, price, walletAddress);
+  }
+}
+
+export async function fillOfferById(id: number, walletAddress: string, price: number) {
+  const contract = await getMarketOfferContract();
+
+  if (contract) {
+    await fillMarketOfferById(contract, id, walletAddress, price);
+  }
+}
+
+export async function cancelOfferById(id: number, walletAddress: string) {
+  const contract = await getMarketOfferContract();
+
+  if (contract) {
+    await cancelMarketOfferById(contract, id, walletAddress);
   }
 }

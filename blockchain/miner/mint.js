@@ -4,10 +4,10 @@ const ipfsHttpClient = require("ipfs-http-client");
 const ipfs = ipfsHttpClient.create({ host: "localhost", port: "5001", protocol: "http" });
 
 const networkId = "5777";
-const toAddress = "0x9EaD711327065c5963682B9b44AA30F68A150a68";
+const toAddress = "0x570A6F85c22ad6aAC932060c6b30aa3167171E0E";
 
 async function main() {
-  const provider = new ethers.providers.JsonRpcProvider("HTTP://127.0.0.1:7545");
+  const provider = new ethers.providers.JsonRpcProvider("http://127.0.0.1:7545");
   const signer = provider.getSigner();
   const gremlinContract = new ethers.Contract(gremlinAbi.networks[networkId].address, gremlinAbi.abi, signer);
 
@@ -36,7 +36,11 @@ async function main() {
 
   console.log("Minting buffalo with IPFS hash (" + uploaded.path + ")");
 
-  gremlinContract.mintItem(toAddress, uploaded.path, { gasLimit: 400000 });
+  const id = await gremlinContract.mintItem(toAddress, uploaded.path);
+
+  console.log(id);
+
+  console.log("Minting successful with id: " + id);
 }
 
 main();

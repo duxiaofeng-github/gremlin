@@ -1,11 +1,12 @@
 import React, { useMemo } from "react";
 import { TabBar } from "antd-mobile";
 import {
-  getHomePagePath,
-  getHomePageRoute,
+  getGrelinDetailRoute,
+  getGremlinsPath,
+  getGremlinsRoute,
   getMarketPlaceRoute,
   getUserRoute,
-  gotoHomePage,
+  gotoGremlins,
   gotoMarketPlace,
   gotoUser,
 } from "../utils/routes";
@@ -14,11 +15,15 @@ import { Route, Switch, Redirect } from "react-router-dom";
 import { styleFlex, styleFlexDirectionColumn, styleFullWidthAndHeight, styleNoShrink } from "../utils/styles";
 import { cx } from "@linaria/core";
 import { ScrollView } from "./common/scroll-view";
-import { HomePage } from "./home-page";
+import { Gremlins } from "./gremlins";
 import { User } from "./user";
 import { MarketPlace } from "./market-place";
 import { Location } from "history";
 import { matchPath } from "react-router";
+import { GremlinDetail } from "./gremlin-detail";
+import { useData } from "../utils/hooks/use-data";
+import { updateOffers } from "../utils/store";
+import { Loading } from "./common/loading";
 
 interface IProps {
   location: Location;
@@ -29,9 +34,9 @@ const tabs = [
     key: "homePage",
     title: "Home",
     icon: <AppOutline />,
-    route: getHomePageRoute(),
-    component: HomePage,
-    onClick: () => gotoHomePage(),
+    route: getGremlinsRoute(),
+    component: Gremlins,
+    onClick: () => gotoGremlins(),
   },
   {
     key: "market",
@@ -56,20 +61,38 @@ export const Index: React.SFC<IProps> = (props) => {
   const matchedTab = useMemo(
     () =>
       tabs.find((item) => {
-        return matchPath(location.pathname, { path: item.route, exact: true });
+        return matchPath(location.pathname, { path: item.route });
       }),
     [location],
   );
+  const options = useData(() => {
+    return updateOffers();
+  });
 
   return (
     <div className={cx(styleFullWidthAndHeight, styleFlex, styleFlexDirectionColumn)}>
       <ScrollView grow>
-        <Switch>
-          {tabs.map((item) => {
-            return <Route key={item.key} exact path={item.route} component={item.component} />;
-          })}
-          <Route render={() => <Redirect to={getHomePagePath()} />} />
-        </Switch>
+        <Loading
+          skipDataChecking
+          options={options}
+          render={() => {
+            return (
+              <Switch>
+                <Route
+                  exact
+                  path={getGrelinDetailRoute()}
+                  render={({ match }) => {
+                    return <GremlinDetail key={match.params.id} id={match.params.id} />;
+                  }}
+                />
+                {tabs.map((item) => {
+                  return <Route key={item.key} exact path={item.route} component={item.component} />;
+                })}
+                <Route render={() => <Redirect to={getGremlinsPath()} />} />
+              </Switch>
+            );
+          }}
+        />
       </ScrollView>
       <div className={styleNoShrink}>
         <TabBar

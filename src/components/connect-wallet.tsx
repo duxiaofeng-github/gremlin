@@ -13,7 +13,7 @@ import {
 import { css, cx } from "@linaria/core";
 import { LinkOutline } from "antd-mobile-icons";
 import { useSubmission } from "../utils/hooks/use-submission";
-import { gotoHomePage } from "../utils/routes";
+import { gotoGremlins } from "../utils/routes";
 
 interface IProps {}
 
@@ -21,7 +21,7 @@ export const ConnectWallet: React.SFC<IProps> = (props) => {
   const { triggerer, submitting } = useSubmission(async () => {
     connectWallet();
 
-    gotoHomePage();
+    gotoGremlins();
   });
 
   return (

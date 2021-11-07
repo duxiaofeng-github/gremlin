@@ -3,6 +3,7 @@ import React from "react";
 import { colorBorder, colorTextLightGray, fontSizeLarge, fontSizeSmall } from "../../utils/styles";
 import { NFTData } from "../../utils/web3";
 import { List as AntdList } from "antd-mobile";
+import { gotoGrelinDetail } from "../../utils/routes";
 
 interface IProps {
   items: NFTData[];
@@ -19,7 +20,15 @@ export const List: React.SFC<IProps> = (props) => {
             key={item.tokenId}
             arrow
             prefix={<img className={styleCover} src={item.metaData.image} />}
-            description={<div className={styleDescription}>{item.metaData.description}</div>}>
+            description={
+              <div
+                className={styleDescription}
+                onClick={() => {
+                  gotoGrelinDetail({ id: `${item.tokenId}` });
+                }}>
+                {item.metaData.description}
+              </div>
+            }>
             <div className={styleName}>{item.metaData.name}</div>
           </AntdList.Item>
         ) : null,

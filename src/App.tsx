@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { Route, Switch } from "react-router-dom";
 import { ConnectWallet } from "./components/connect-wallet";
 import { Index } from "./components";
-import { getConnectWalletRoute, gotoConnectWallet, gotoHomePage } from "./utils/routes";
+import { getConnectWalletRoute, gotoConnectWallet, gotoGremlins } from "./utils/routes";
 import { getCachedAccount } from "./utils/web3";
 import { globalStore, IStore } from "./utils/store";
 import { useRexContext } from "./utils/store/store";
@@ -26,7 +26,7 @@ export const App: React.SFC<IProps> = (props) => {
       });
 
       if (matchPath(location.pathname, { path: getConnectWalletRoute(), exact: true })) {
-        gotoHomePage();
+        gotoGremlins();
       }
     } else {
       gotoConnectWallet();

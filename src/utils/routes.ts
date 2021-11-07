@@ -15,16 +15,16 @@ export function gotoEntry() {
   history.push(getEntryPath());
 }
 
-export function getHomePageRoute() {
-  return "/home";
+export function getGremlinsRoute() {
+  return "/gremlins";
 }
 
-export function getHomePagePath() {
-  return replacePathParameters(getHomePageRoute(), {});
+export function getGremlinsPath() {
+  return replacePathParameters(getGremlinsRoute(), {});
 }
 
-export function gotoHomePage() {
-  history.push(getHomePagePath());
+export function gotoGremlins() {
+  history.push(getGremlinsPath());
 }
 
 export function getConnectWalletRoute() {

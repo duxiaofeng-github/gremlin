@@ -4,6 +4,7 @@ import WalletConnectProvider from "@walletconnect/web3-provider";
 import { globalStore } from "./store";
 import { AbiItem } from "web3-utils";
 import { Contract } from "web3-eth-contract";
+import { parseId } from "./common";
 
 let web3ModalCache: Web3Modal | undefined;
 
@@ -164,8 +165,9 @@ interface NFTMetaData {
 }
 
 export interface NFTData {
-  tokenId: string;
+  tokenId: number;
   tokenUri: string;
+  owner?: string;
   metaData?: NFTMetaData;
 }
 
@@ -175,12 +177,111 @@ export async function loadNFTsByAddress(contract: Contract, walletAddress: strin
 
   for (let i = 0; i < balance; i++) {
     const tokenId = await contract.methods.tokenOfOwnerByIndex(walletAddress, i).call();
-    const tokenUri = await contract.methods.tokenURI(tokenId).call();
+    const tokenUri = await loadTokenUriById(contract, tokenId);
 
-    NFTs.push({ tokenId, tokenUri });
+    NFTs.push({ tokenId, tokenUri, owner: walletAddress });
   }
 
   return NFTs;
+}
+
+export async function loadNFTsByMarketOffers(contract: Contract, offers: MarketOfferData[]) {
+  const tokenIds = offers.map((item) => item.id);
+  const tokenUris = await Promise.all(tokenIds.map((tokenId) => loadTokenUriById(contract, tokenId)));
+  const NFTs: NFTData[] = tokenIds.map((tokenId, index) => {
+    return { tokenId, tokenUri: tokenUris[index] };
+  });
+
+  return NFTs;
+}
+
+export async function loadNFTById(contract: Contract, tokenId: number): Promise<NFTData> {
+  const [tokenUri, owner] = await Promise.all([
+    loadTokenUriById(contract, tokenId),
+    loadTokenOwnerById(contract, tokenId),
+  ]);
+
+  return { tokenId, tokenUri, owner };
+}
+
+export async function loadTokenUriById(contract: Contract, tokenId: number): Promise<string> {
+  const tokenUri = await contract.methods.tokenURI(tokenId).call();
+
+  return tokenUri;
+}
+
+export async function loadTokenOwnerById(contract: Contract, tokenId: number): Promise<string> {
+  const owner = await contract.methods.ownerOf(tokenId).call();
+
+  return owner;
+}
+
+export interface MarketOfferData {
+  id: number;
+  offerId: number;
+  price: number;
+  user: string;
+  fulfilled: boolean;
+  cancelled: boolean;
+}
+
+function formatOffer(offer: any): MarketOfferData {
+  const { id, offerId, price, user, fulfilled, cancelled } = offer;
+
+  return { id: parseId(id), offerId: parseId(offerId), price: parseFloat(price), user, fulfilled, cancelled };
+}
+
+export async function loadMarketOffers(marketContract: Contract) {
+  const offerCount = await marketContract.methods.offerCount().call();
+  const offerPromises = [];
+
+  for (let i = 1; i <= offerCount; i++) {
+    offerPromises.push(marketContract.methods.offers(i).call());
+  }
+
+  const offers = await Promise.all(offerPromises);
+
+  return offers.map((item) => formatOffer(item));
+}
+
+export async function cancelMarketOfferById(marketContract: Contract, tokenId: number, walletAddress: string) {
+  await marketContract.methods.cancelOffer(tokenId).send({ from: walletAddress });
+}
+
+export async function makeMarketOfferById(
+  gremlinContract: Contract,
+  marketContract: Contract,
+  tokenId: number,
+  price: number,
+  walletAddress: string,
+) {
+  const priceWei = Web3.utils.toWei(`${price}`, "ether");
+
+  return new Promise<void>((resolve, reject) => {
+    gremlinContract.methods
+      .approve(marketContract.options.address, tokenId)
+      .send({ from: walletAddress })
+      .on("receipt", () => {
+        marketContract.methods
+          .makeOffer(tokenId, priceWei)
+          .send({ from: walletAddress })
+          .on("receipt", () => {
+            resolve();
+          })
+          .on("error", (err: Error) => {
+            reject(err);
+          });
+      });
+  });
+}
+
+export async function fillMarketOfferById(
+  marketContract: Contract,
+  tokenId: number,
+  walletAddress: string,
+  price: number,
+) {
+  await marketContract.methods.fillOffer(tokenId).send({ from: walletAddress, value: `${price}` });
 }
 
 export async function getBalance(walletAddress: string) {
