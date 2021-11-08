@@ -1,4 +1,6 @@
-# Getting Started with Create React App
+# Gremlin
+
+A NFT demo dapp with marketplace.
 
 ## Get Started
 
