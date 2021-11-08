@@ -38,6 +38,16 @@ npm i truffle -g
 cd blockchain && truffle migrate --network development; cd -
 ```
 
+### Deploy to test network
+
+[Signup](https://infura.io/) your INFURA account and get your INFURA_ID.
+
+```
+export PRIVATE_KEYS=xxx;
+export INFURA_ID=xxx;
+cd blockchain && truffle migrate --network rinkeby; cd -
+```
+
 ## Mint
 
 ```

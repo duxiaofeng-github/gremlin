@@ -8,7 +8,7 @@ const ReactRefreshPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
 
 const isProductionEnv = process.env.NODE_ENV === "production";
 const isDevelopmentEnv = process.env.NODE_ENV === "development";
-const infuraId = process.env.INFURA_ID || "";
+const infuraId = process.env.INFURA_ID || "d974d479eadd4dd1a78b7804e6b0000f";
 const ipfsHost = process.env.IPFS_HOST || "http://localhost:10098";
 
 module.exports = {

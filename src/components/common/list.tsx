@@ -73,7 +73,7 @@ const styleIcon = css`
 const stylePrice = css`
   display: flex;
   align-items: center;
-  color: var(--adm-color-primary);
+  color: var(--adm-color-danger);
   font-weight: bold;
   margin-top: 10px;
 `;

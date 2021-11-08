@@ -14,7 +14,7 @@ module.exports = {
       provider: function () {
         return new HDWalletProvider(
           privateKeys.split(","), // array of private keys
-          `https://rinkeby.infura.io/v3/${process.env.INFURA_API_KEY}`, // Url to an Ethereum node
+          `https://rinkeby.infura.io/v3/${process.env.INFURA_ID}`, // Url to an Ethereum node
         );
       },
       gas: 5000000,

@@ -25,6 +25,8 @@ import { useRexContext } from "../utils/store/store";
 import { IStore, updateOffers } from "../utils/store";
 import { OfferModal } from "./common/offer-modal";
 import { useSubmission } from "../utils/hooks/use-submission";
+import Eth from "../../public/eth.svg";
+import { formatPrice } from "../utils/common";
 
 interface IProps {
   id?: string;
@@ -90,6 +92,12 @@ export const GremlinDetail: React.SFC<IProps> = (props) => {
               <div className={styleContainer}>
                 <img className={styleCover} src={gremlin.metaData.image} />
                 <div className={styleName}>Name: {gremlin.metaData.name}</div>
+                {offer && (
+                  <div className={stylePriceContainer}>
+                    <Eth className={styleIcon} width={20} height={20} fill="var(--adm-color-text)" />
+                    Sale for<div className={stylePrice}>{formatPrice(offer.price)} ETH</div>
+                  </div>
+                )}
                 <div className={styleAttributes}>
                   {gremlin.metaData.attributes &&
                     gremlin.metaData.attributes.map((item, index) => {
@@ -222,4 +230,22 @@ const styleAttributeName = css`
 
 const styleAttributes = css`
   margin-bottom: 40px;
+`;
+
+const styleIcon = css`
+  margin-left: -3px;
+  margin-right: 5px;
+`;
+
+const stylePriceContainer = css`
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+`;
+
+const stylePrice = css`
+  color: var(--adm-color-danger);
+  padding-left: 5px;
 `;
