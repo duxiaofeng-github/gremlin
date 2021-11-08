@@ -9,10 +9,18 @@ import {
   parseId,
 } from "../utils/common";
 import { useData } from "../utils/hooks/use-data";
-import { styleFlex, styleFlexDirectionColumn, styleFullWidthAndHeight } from "../utils/styles";
+import {
+  colorTextLightGray,
+  fontSizeSmall,
+  fontSizeXlarge,
+  styleBackgroundWhite,
+  styleFlex,
+  styleFlexDirectionColumn,
+  styleFullWidthAndHeight,
+} from "../utils/styles";
 import { FullScreenTips } from "./common/full-screen-tips";
 import { Loading } from "./common/loading";
-import { Button, Dialog, Toast } from "antd-mobile";
+import { Button, Dialog, ProgressBar, Toast } from "antd-mobile";
 import { useRexContext } from "../utils/store/store";
 import { IStore, updateOffers } from "../utils/store";
 import { OfferModal } from "./common/offer-modal";
@@ -77,48 +85,78 @@ export const GremlinDetail: React.SFC<IProps> = (props) => {
         const isMyGremlin = walletAddress === ownerUser;
 
         return (
-          <div className={cx(styleFullWidthAndHeight, styleFlex, styleFlexDirectionColumn)}>
-            {gremlin.metaData ? <img className={styleCover} src={gremlin.metaData.image} /> : null}
-            {isMyGremlin ? (
-              offer ? (
-                <Button
-                  block
-                  color="danger"
-                  onClick={() => {
-                    Dialog.confirm({
-                      content: "Are you sure to cancel the order?",
-                      onConfirm: () => {
-                        cancelOffer({ offerId: offer.offerId });
-                      },
-                    });
-                  }}>
-                  Cancel Order
-                </Button>
-              ) : (
-                <Button
-                  block
-                  color="primary"
-                  onClick={() => {
-                    setModalVisible(true);
-                  }}>
-                  Make Offer
-                </Button>
-              )
-            ) : offer ? (
-              <Button
-                block
-                color="primary"
-                onClick={() => {
-                  Dialog.confirm({
-                    content: "Are you sure to buy this gremlin?",
-                    onConfirm: () => {
-                      fillOffer({ offerId: offer.offerId, price: offer.price });
-                    },
-                  });
-                }}>
-                Buy
-              </Button>
+          <div className={cx(styleFullWidthAndHeight, styleBackgroundWhite, styleFlex, styleFlexDirectionColumn)}>
+            {gremlin.metaData ? (
+              <div className={styleContainer}>
+                <img className={styleCover} src={gremlin.metaData.image} />
+                <div className={styleName}>Name: {gremlin.metaData.name}</div>
+                <div className={styleAttributes}>
+                  {gremlin.metaData.attributes &&
+                    gremlin.metaData.attributes.map((item, index) => {
+                      return (
+                        <>
+                          <div className={styleAttributeName}>{formatAttributeName(item.trait_type)}</div>
+                          <ProgressBar
+                            percent={parseInt(`${item.value}`)}
+                            style={{
+                              "--track-width": "8px",
+                              "--fill-color":
+                                index % 4 === 1
+                                  ? "var(--adm-color-success)"
+                                  : index % 4 === 2
+                                  ? "var(--adm-color-danger)"
+                                  : index % 4 === 3
+                                  ? "var(--adm-color-warning)"
+                                  : "var(--adm-color-primary)",
+                            }}
+                          />
+                        </>
+                      );
+                    })}
+                </div>
+                {isMyGremlin ? (
+                  offer ? (
+                    <Button
+                      block
+                      color="danger"
+                      onClick={() => {
+                        Dialog.confirm({
+                          content: "Are you sure to cancel the order?",
+                          onConfirm: () => {
+                            cancelOffer({ offerId: offer.offerId });
+                          },
+                        });
+                      }}>
+                      Cancel Order
+                    </Button>
+                  ) : (
+                    <Button
+                      block
+                      color="primary"
+                      onClick={() => {
+                        setModalVisible(true);
+                      }}>
+                      Make Offer
+                    </Button>
+                  )
+                ) : offer ? (
+                  <Button
+                    block
+                    color="primary"
+                    onClick={() => {
+                      Dialog.confirm({
+                        content: "Are you sure to buy this gremlin?",
+                        onConfirm: () => {
+                          fillOffer({ offerId: offer.offerId, price: offer.price });
+                        },
+                      });
+                    }}>
+                    Buy
+                  </Button>
+                ) : null}
+              </div>
             ) : null}
+
             <OfferModal
               visible={modalVisible}
               onOk={(price: number) => {
@@ -137,9 +175,51 @@ export const GremlinDetail: React.SFC<IProps> = (props) => {
   );
 };
 
+function formatAttributeName(name: string) {
+  switch (name) {
+    case "hp":
+      return "HP";
+    case "mp":
+      return "MP";
+    case "intelligence":
+      return "Intelligence";
+    case "dexterity":
+      return "Dexterity";
+    case "strength":
+      return "Strength";
+  }
+
+  return name;
+}
+
+const styleContainer = css`
+  margin: 20px;
+`;
+
 const styleCover = css`
-  height: 20vw;
-  width: 20vw;
-  max-height: 100px;
-  max-width: 100px;
+  display: block;
+  margin: 0 auto;
+  height: 50vw;
+  width: 50vw;
+  max-height: 500px;
+  max-width: 500px;
+`;
+
+const styleName = css`
+  margin-top: 20px;
+  font-size: ${fontSizeXlarge};
+  font-weight: bold;
+  text-align: center;
+`;
+
+const styleAttributeName = css`
+  margin-top: 15px;
+  margin-bottom: 7px;
+  font-size: ${fontSizeSmall};
+  color: ${colorTextLightGray};
+  font-weight: bold;
+`;
+
+const styleAttributes = css`
+  margin-bottom: 40px;
 `;

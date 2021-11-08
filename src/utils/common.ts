@@ -123,6 +123,8 @@ export async function fillNFTsMetaData(nfts: NFTData[]) {
   const metaDatas = await Promise.all(jsonPromises);
 
   metaDatas.forEach((item, index) => {
+    item.image = `${ipfsHost}/ipfs/${item.image}/gremlin.svg`;
+
     if (item != null) {
       nfts[index].metaData = item;
     }
