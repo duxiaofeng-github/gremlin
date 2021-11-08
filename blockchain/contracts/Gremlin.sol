@@ -37,7 +37,7 @@ contract Gremlin is ERC721, ERC721URIStorage, ERC721Enumerable, Ownable {
     return super.tokenURI(tokenId);
   }
 
-  function mintItem(address to, string memory tokenUri) public onlyOwner returns (uint256) {
+  function mintItem(address to, string memory tokenUri) public returns (uint256) {
     _tokenIds.increment();
 
     uint256 id = _tokenIds.current();

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
-const { ethers } = require("ethers");
+const Web3 = require("web3");
+const HDWalletProvider = require("truffle-hdwallet-provider-privkey");
 const gremlinAbi = require("../abis/Gremlin.json");
 const ipfsHttpClient = require("ipfs-http-client");
 const fs = require("fs");
@@ -80,11 +81,18 @@ function generateDescription({ mp, hp }) {
   return `MP: ${mp}, HP: ${hp}`;
 }
 
-async function main(networkId, walletAddress, jsonRpcAddress, ipfsGatewayAddress) {
+function getWeb3(jsonRpcAddress, privateKey) {
+  const provider = new HDWalletProvider([privateKey], jsonRpcAddress);
+  const web3 = new Web3(provider);
+  const account = web3.eth.accounts.privateKeyToAccount(privateKey);
+
+  return { web3, account };
+}
+
+async function main(networkId, walletPrivateKey, jsonRpcAddress, ipfsGatewayAddress) {
   const ipfs = ipfsHttpClient.create({ url: ipfsGatewayAddress });
-  const provider = new ethers.providers.JsonRpcProvider(jsonRpcAddress);
-  const signer = provider.getSigner();
-  const gremlinContract = new ethers.Contract(gremlinAbi.networks[networkId].address, gremlinAbi.abi, signer);
+  const { web3, account } = getWeb3(jsonRpcAddress, walletPrivateKey);
+  const gremlinContract = new web3.eth.Contract(gremlinAbi.abi, gremlinAbi.networks[networkId].address);
 
   const data = getSvgData();
   const svgFile = fs.readFileSync(path.resolve(__dirname, "../../public/gremlin.svg"), { encoding: "UTF-8" });
@@ -119,28 +127,37 @@ async function main(networkId, walletAddress, jsonRpcAddress, ipfsGatewayAddress
 
   const uploadedMetaData = await ipfs.add(JSON.stringify(metaData));
 
-  const { hash } = await gremlinContract.mintItem(walletAddress, uploadedMetaData.path);
+  const { transactionHash } = await new Promise((resolve, reject) => {
+    gremlinContract.methods
+      .mintItem(account.address, uploadedMetaData.path)
+      .send({ from: account.address, gas: 4712388 })
+      .on("receipt", (data) => {
+        resolve(data);
+      });
+  });
 
-  console.log("Minting successful with hash: " + hash);
+  console.log("Minting successful with hash: " + transactionHash);
+
+  process.exit();
 }
 
 program
   .option("--network-id [id]", "The network id you want to access")
-  .option("--wallet-address [address]", "The wallet address where your gremlins will send to")
+  .option("--wallet-private-key [key]", "The wallet private key where your gremlins will send to")
   .option("--json-rpc-address [address]", "The rpc address of your ethereum node")
   .option("--ipfs-gateway-address [address]", "The gateway address of ipfs")
   .parse();
 
-const { networkId, walletAddress, jsonRpcAddress, ipfsGatewayAddress } = program.opts();
+const { networkId, walletPrivateKey, jsonRpcAddress, ipfsGatewayAddress } = program.opts();
 
 if (!networkId) {
   console.log("networkId is required");
-} else if (!walletAddress) {
-  console.log("walletAddress is required");
+} else if (!walletPrivateKey) {
+  console.log("walletPrivateKey is required");
 } else if (!jsonRpcAddress) {
   console.log("jsonRpcAddress is required");
 } else if (!ipfsGatewayAddress) {
   console.log("ipfsGatewayAddress is required");
 } else {
-  main(networkId, walletAddress, jsonRpcAddress);
+  main(networkId, walletPrivateKey, jsonRpcAddress, ipfsGatewayAddress);
 }

@@ -40,16 +40,28 @@ cd blockchain && truffle migrate --network development; cd -
 
 ### Deploy to test network
 
-[Signup](https://infura.io/) your INFURA account and get your INFURA_ID.
+[Signup](https://infura.io/) your INFURA account and get your JSON_RPC_ADDRESS.
 
 ```
 export PRIVATE_KEYS=xxx;
-export INFURA_ID=xxx;
+export JSON_RPC_ADDRESS=https://rinkeby.infura.io/v3/xxx;
 cd blockchain && truffle migrate --network rinkeby; cd -
 ```
 
 ## Mint
 
+### Local
+
+Get you `wallet-private-key` from ganache ui `accounts` list
+
 ```
-npm run mint -- --network-id 5777 --wallet-address 0x570A6F85c22ad6aAC932060c6b30aa3167171E0E --json-rpc-address http://127.0.0.1:7545
+npm run mint -- --network-id 5777 --wallet-private-key xxx --json-rpc-address http://127.0.0.1:7545 --ipfs-gateway-address http://localhost:5001
+```
+
+### Test net
+
+```
+export PRIVATE_KEYS=xxx;
+export JSON_RPC_ADDRESS=https://rinkeby.infura.io/v3/xxx;
+cd blockchain && truffle migrate --reset --network rinkeby; cd -
 ```

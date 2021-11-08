@@ -2,6 +2,7 @@ require("dotenv").config();
 
 const HDWalletProvider = require("truffle-hdwallet-provider-privkey");
 const privateKeys = process.env.PRIVATE_KEYS || "";
+const jsonRpcAddress = process.env.JSON_RPC_ADDRESS || "";
 
 module.exports = {
   networks: {
@@ -14,7 +15,7 @@ module.exports = {
       provider: function () {
         return new HDWalletProvider(
           privateKeys.split(","), // array of private keys
-          `https://rinkeby.infura.io/v3/${process.env.INFURA_ID}`, // Url to an Ethereum node
+          jsonRpcAddress, // Url to an Ethereum node
         );
       },
       gas: 5000000,
