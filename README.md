@@ -55,13 +55,11 @@ cd blockchain && truffle migrate --network rinkeby; cd -
 Get you `wallet-private-key` from ganache ui `accounts` list
 
 ```
-npm run mint -- --network-id 5777 --wallet-private-key xxx --json-rpc-address http://127.0.0.1:7545 --ipfs-gateway-address http://localhost:5001
+npm run mint -- --network-id 5777 --wallet-private-key xxx --json-rpc-address http://127.0.0.1:7545 --ipfs-gateway-address http://43.132.190.75:5001
 ```
 
 ### Test net
 
 ```
-export PRIVATE_KEYS=xxx;
-export JSON_RPC_ADDRESS=https://rinkeby.infura.io/v3/xxx;
-cd blockchain && truffle migrate --reset --network rinkeby; cd -
+npm run mint -- --network-id 4 --wallet-private-key 2a251a2ad5695a8b5c693d76df0c7e275e10b82d402f2721dcfd8fd78d5b57c2 --json-rpc-address https://rinkeby.infura.io/v3/xxx --ipfs-gateway-address http://43.132.190.75:5001
 ```
