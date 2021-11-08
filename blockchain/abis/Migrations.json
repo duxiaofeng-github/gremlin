@@ -2302,6 +2302,12 @@
     "version": "0.8.9+commit.e5eed63a.Darwin.appleclang"
   },
   "networks": {
+    "4": {
+      "events": {},
+      "links": {},
+      "address": "0xA53df962A3FAF8dE5854E6F53f671A26127f5319",
+      "transactionHash": "0x35545542cc52d43a237313b2d7e058db22a4b868ef179086709057182ca1e287"
+    },
     "5777": {
       "events": {},
       "links": {},
@@ -2322,7 +2328,7 @@
     }
   },
   "schemaVersion": "3.4.3",
-  "updatedAt": "2021-11-08T06:39:54.319Z",
+  "updatedAt": "2021-11-08T09:51:46.267Z",
   "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",
