@@ -3,7 +3,6 @@
 const { ethers } = require("ethers");
 const gremlinAbi = require("../abis/Gremlin.json");
 const ipfsHttpClient = require("ipfs-http-client");
-const ipfs = ipfsHttpClient.create({ host: "localhost", port: "5001", protocol: "http" });
 const fs = require("fs");
 const path = require("path");
 const Handlebars = require("handlebars");
@@ -81,7 +80,8 @@ function generateDescription({ mp, hp }) {
   return `MP: ${mp}, HP: ${hp}`;
 }
 
-async function main(networkId, walletAddress, jsonRpcAddress) {
+async function main(networkId, walletAddress, jsonRpcAddress, ipfsGatewayAddress) {
+  const ipfs = ipfsHttpClient.create({ url: ipfsGatewayAddress });
   const provider = new ethers.providers.JsonRpcProvider(jsonRpcAddress);
   const signer = provider.getSigner();
   const gremlinContract = new ethers.Contract(gremlinAbi.networks[networkId].address, gremlinAbi.abi, signer);
@@ -128,9 +128,10 @@ program
   .option("--network-id [id]", "The network id you want to access")
   .option("--wallet-address [address]", "The wallet address where your gremlins will send to")
   .option("--json-rpc-address [address]", "The rpc address of your ethereum node")
+  .option("--ipfs-gateway-address [address]", "The gateway address of ipfs")
   .parse();
 
-const { networkId, walletAddress, jsonRpcAddress } = program.opts();
+const { networkId, walletAddress, jsonRpcAddress, ipfsGatewayAddress } = program.opts();
 
 if (!networkId) {
   console.log("networkId is required");
@@ -138,6 +139,8 @@ if (!networkId) {
   console.log("walletAddress is required");
 } else if (!jsonRpcAddress) {
   console.log("jsonRpcAddress is required");
+} else if (!ipfsGatewayAddress) {
+  console.log("ipfsGatewayAddress is required");
 } else {
   main(networkId, walletAddress, jsonRpcAddress);
 }

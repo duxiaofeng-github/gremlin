@@ -18,7 +18,7 @@ module.exports = {
   },
   output: {
     filename: "[name].[chunkhash:8].js",
-    path: path.resolve(__dirname, "./dist"),
+    path: path.resolve(__dirname, "./dapp"),
   },
   module: {
     rules: [
